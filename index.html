@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Thumbnail Tester</title>
+<style>
+:root {
+  --bg: #f4f4f4;
+  --panel: #ffffff;
+  --panel-2: #ececec;
+  --ink: #1a1a1a;
+  --ink-soft: #555555;
+  --rule: #d0d0d0;
+  --accent: #c0388f;
+  --accent-deep: #971f6f;
+  --yt-light-bg: #f9f9f9;
+  --yt-light-text: #0f0f0f;
+  --yt-light-meta: #606060;
+  --yt-dark-bg: #0f0f0f;
+  --yt-dark-text: #f1f1f1;
+  --yt-dark-meta: #aaaaaa;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a;
+  --panel: #252525;
+  --panel-2: #2c2c2c;
+  --ink: #f0f0f0;
+  --ink-soft: #b0b0b0;
+  --rule: #3a3a3a;
+  --accent: #ff5cb0;
+  --accent-deep: #ff80c4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 1.5rem 1rem;
+  line-height: 1.5;
+}
+.wrap { max-width: 1300px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lede {
+  font-size: 0.92rem;
+  margin-bottom: 1.5rem;
+  color: var(--ink-soft);
+  max-width: 65ch;
+}
+.controls {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-radius: 3px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.field { display: flex; flex-direction: column; }
+label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-soft);
+  margin-bottom: 0.35rem;
+}
+input[type="text"], input[type="file"] {
+  width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.55rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border-radius: 2px;
+}
+input[type="text"]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+input[type="file"] { padding: 0.45rem; cursor: pointer; }
+.help {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  margin-top: 0.25rem;
+}
+.btn-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+}
+button {
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--panel);
+  font-weight: 600;
+}
+[data-theme="dark"] button.primary {
+  color: var(--bg) !important;
+}
+button.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+button:hover { border-color: var(--accent); }
+.placements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 1.5rem;
+}
+.placement {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  border-radius: 3px;
+}
+.placement-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.placement-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.placement-spec {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+.placement-preview {
+  background: var(--yt-light-bg);
+  padding: 1rem;
+  border-radius: 3px;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.placement-preview.dark {
+  background: var(--yt-dark-bg);
+}
+.theme-tag {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  font-size: 0.65rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.15rem 0.4rem;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+.theme-tag.light {
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+}
+
+/* YouTube-style cards */
+.yt-search-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+.yt-search-card .thumb {
+  width: 240px;
+  aspect-ratio: 16 / 9;
+  background: #888;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.yt-search-card .info { flex: 1; min-width: 0; }
+.yt-search-card .title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.placement-preview:not(.dark) .yt-search-card .title { color: var(--yt-light-text); }
+.placement-preview.dark .yt-search-card .title { color: var(--yt-dark-text); }
+.yt-search-card .meta {
+  font-size: 0.78rem;
+  margin-bottom: 0.4rem;
+}
+.placement-preview:not(.dark) .yt-search-card .meta { color: var(--yt-light-meta); }
+.placement-preview.dark .yt-search-card .meta { color: var(--yt-dark-meta); }
+
+.yt-sidebar-card {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.yt-sidebar-card .thumb {
+  width: 168px;
+  aspect-ratio: 16 / 9;
+  background: #888;
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.yt-sidebar-card .info { flex: 1; min-width: 0; }
+.yt-sidebar-card .title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.placement-preview:not(.dark) .yt-sidebar-card .title { color: var(--yt-light-text); }
+.placement-preview.dark .yt-sidebar-card .title { color: var(--yt-dark-text); }
+.yt-sidebar-card .meta {
+  font-size: 0.72rem;
+}
+.placement-preview:not(.dark) .yt-sidebar-card .meta { color: var(--yt-light-meta); }
+.placement-preview.dark .yt-sidebar-card .meta { color: var(--yt-dark-meta); }
+
+.yt-feed-card {
+  max-width: 320px;
+}
+.yt-feed-card .thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #888;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  margin-bottom: 0.6rem;
+}
+.yt-feed-card .title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.placement-preview:not(.dark) .yt-feed-card .title { color: var(--yt-light-text); }
+.placement-preview.dark .yt-feed-card .title { color: var(--yt-dark-text); }
+.yt-feed-card .meta {
+  font-size: 0.78rem;
+}
+.placement-preview:not(.dark) .yt-feed-card .meta { color: var(--yt-light-meta); }
+.placement-preview.dark .yt-feed-card .meta { color: var(--yt-dark-meta); }
+
+.yt-mobile-card {
+  max-width: 360px;
+}
+.yt-mobile-card .thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #888;
+  background-size: cover;
+  background-position: center;
+  border-radius: 0;
+  margin-bottom: 0.6rem;
+}
+.yt-mobile-card .info { padding: 0 0.5rem; }
+.yt-mobile-card .title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.placement-preview:not(.dark) .yt-mobile-card .title { color: var(--yt-light-text); }
+.placement-preview.dark .yt-mobile-card .title { color: var(--yt-dark-text); }
+.yt-mobile-card .meta {
+  font-size: 0.8rem;
+}
+.placement-preview:not(.dark) .yt-mobile-card .meta { color: var(--yt-light-meta); }
+.placement-preview.dark .yt-mobile-card .meta { color: var(--yt-dark-meta); }
+
+.yt-tiny-thumb {
+  width: 88px;
+  aspect-ratio: 16 / 9;
+  background: #888;
+  background-size: cover;
+  background-position: center;
+  border-radius: 3px;
+}
+.yt-tiny-card {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.yt-tiny-card .info { flex: 1; min-width: 0; }
+.yt-tiny-card .title {
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.placement-preview:not(.dark) .yt-tiny-card .title { color: var(--yt-light-text); }
+.placement-preview.dark .yt-tiny-card .title { color: var(--yt-dark-text); }
+
+.thumbnail-loaded {
+  background-color: transparent;
+}
+
+.checks {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+  border-radius: 3px;
+}
+.checks h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 0.85rem;
+}
+.checks-list {
+  list-style: none;
+  padding: 0;
+}
+.checks-list li {
+  padding: 0.4rem 0;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.checks-list li:last-child { border-bottom: none; }
+.check-icon {
+  font-weight: 700;
+  font-size: 0.8rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+}
+.check-icon.ok { color: #2a7a1a; }
+.check-icon.warn { color: #a05818; }
+.check-icon.info { color: var(--accent); }
+[data-theme="dark"] .check-icon.ok { color: #6dd380; }
+[data-theme="dark"] .check-icon.warn { color: #d4a155; }
+.empty {
+  background: var(--panel-2);
+  padding: 2rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  border-radius: 3px;
+  border: 1px dashed var(--rule);
+}
+footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 700px) {
+  body { padding: 1rem 0.75rem; }
+  .controls { grid-template-columns: 1fr; }
+  h1 { font-size: 1.25rem; }
+  .yt-search-card { flex-direction: column; }
+  .yt-search-card .thumb { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>YouTube Thumbnail Tester</h1>
+    <div class="subtitle">// preview thumbnail + title across all YouTube placements</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede">Upload a thumbnail, type a title, and see how the combination looks in YouTube search results, sidebar suggestions, the home feed, mobile feed, and small-format placements (notifications, end screens). Both light and dark themes shown side-by-side. Everything runs in your browser.</p>
+
+<div class="controls">
+  <div class="field">
+    <label for="thumb-input">Thumbnail image</label>
+    <input type="file" id="thumb-input" accept="image/png,image/jpeg,image/webp">
+    <div class="help">PNG, JPEG, or WebP. Recommended 1280x720.</div>
+  </div>
+  <div class="field">
+    <label for="title-input">Title</label>
+    <input type="text" id="title-input" placeholder="Your video title here" maxlength="100">
+    <div class="help"><span id="title-count">0</span>/100 characters</div>
+  </div>
+  <div class="field">
+    <label for="channel-input">Channel name</label>
+    <input type="text" id="channel-input" placeholder="Your channel name" value="Your Channel">
+  </div>
+  <div class="field">
+    <label for="meta-input">Metadata (e.g. "1.2M views &bull; 3 days ago")</label>
+    <input type="text" id="meta-input" placeholder="123K views &bull; 2 hours ago" value="42K views &bull; 1 day ago">
+  </div>
+  <div class="btn-row">
+    <button id="sample-btn" type="button">Load sample thumbnail</button>
+    <button id="clear-btn" type="button">Clear</button>
+  </div>
+</div>
+
+<div id="empty" class="empty">Upload a thumbnail to see all placement previews.</div>
+
+<div class="placements-grid" id="grid" style="display: none;">
+
+  <!-- Search result -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Search result</div>
+      <div class="placement-spec">desktop, ~240px thumb</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-search-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-search-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Home feed -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Home feed</div>
+      <div class="placement-spec">desktop, full width thumb</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-feed-card">
+        <div class="thumb" data-thumb></div>
+        <div class="title" data-title></div>
+        <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-feed-card">
+        <div class="thumb" data-thumb></div>
+        <div class="title" data-title></div>
+        <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile feed -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Mobile feed</div>
+      <div class="placement-spec">mobile app, full-width</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-mobile-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-mobile-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span> &middot; <span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar / Up Next -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Sidebar / Up Next</div>
+      <div class="placement-spec">desktop, ~168px thumb</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-sidebar-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span></div>
+          <div class="meta"><span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-sidebar-card">
+        <div class="thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta"><span data-channel></span></div>
+          <div class="meta"><span data-meta></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification / Tiny -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Notification / End screen</div>
+      <div class="placement-spec">88px thumb, smallest readable</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-tiny-card">
+        <div class="yt-tiny-thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta" style="font-size: 0.65rem;"><span data-channel></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-tiny-card">
+        <div class="yt-tiny-thumb" data-thumb></div>
+        <div class="info">
+          <div class="title" data-title></div>
+          <div class="meta" style="font-size: 0.65rem;"><span data-channel></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel page -->
+  <div class="placement">
+    <div class="placement-head">
+      <div class="placement-name">Channel page</div>
+      <div class="placement-spec">grid layout</div>
+    </div>
+    <div class="placement-preview">
+      <div class="theme-tag light">light</div>
+      <div class="yt-feed-card" style="max-width: 240px;">
+        <div class="thumb" data-thumb></div>
+        <div class="title" data-title style="font-size: 0.85rem;"></div>
+        <div class="meta" style="font-size: 0.72rem;"><span data-meta></span></div>
+      </div>
+    </div>
+    <div class="placement-preview dark">
+      <div class="theme-tag">dark</div>
+      <div class="yt-feed-card" style="max-width: 240px;">
+        <div class="thumb" data-thumb></div>
+        <div class="title" data-title style="font-size: 0.85rem;"></div>
+        <div class="meta" style="font-size: 0.72rem;"><span data-meta></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="checks" id="checks-section" style="display: none;">
+  <h2>Checks</h2>
+  <ul class="checks-list" id="checks"></ul>
+</div>
+
+<footer>
+  <div>YouTube Thumbnail Tester. MIT licensed. <a href="https://github.com/0xelitesystem/youtube-thumbnail-tester" target="_blank" rel="noopener">View source</a>.</div>
+  <div>Not affiliated with YouTube. All previews approximate.</div>
+</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+
+let currentImageDataUrl = null;
+let currentImageDimensions = null;
+
+function applyToAll() {
+  const title = $("title-input").value || "Your video title here";
+  const channel = $("channel-input").value || "Your Channel";
+  const meta = $("meta-input").value || "0 views";
+
+  $$("[data-title]").forEach(el => el.textContent = title);
+  $$("[data-channel]").forEach(el => el.textContent = channel);
+  $$("[data-meta]").forEach(el => el.innerHTML = meta);
+
+  if (currentImageDataUrl) {
+    $$("[data-thumb]").forEach(el => {
+      el.style.backgroundImage = `url('${currentImageDataUrl}')`;
+      el.classList.add("thumbnail-loaded");
+    });
+    $("empty").style.display = "none";
+    $("grid").style.display = "grid";
+    $("checks-section").style.display = "block";
+    runChecks(title);
+  }
+  $("title-count").textContent = title === "Your video title here" ? 0 : title.length;
+}
+
+function runChecks(title) {
+  const checks = [];
+
+  if (title.length > 70) {
+    checks.push({ level: "warn", msg: `Title is ${title.length} chars. Likely truncated to ~60 visible chars on most placements.` });
+  } else if (title.length > 0 && title !== "Your video title here") {
+    checks.push({ level: "ok", msg: `Title length OK (${title.length} chars).` });
+  }
+
+  if (currentImageDimensions) {
+    const { w, h } = currentImageDimensions;
+    const ratio = w / h;
+    if (Math.abs(ratio - 16 / 9) > 0.05) {
+      checks.push({ level: "warn", msg: `Image is ${w}x${h} (ratio ${ratio.toFixed(2)}). YouTube expects 16:9 (1.78). Off-ratio thumbs get letterboxed or cropped.` });
+    } else {
+      checks.push({ level: "ok", msg: `Aspect ratio is 16:9 (${w}x${h}).` });
+    }
+    if (w < 1280) {
+      checks.push({ level: "warn", msg: `Image width is ${w}px. YouTube recommends at least 1280px wide; smaller looks blurry on large screens.` });
+    } else {
+      checks.push({ level: "ok", msg: `Resolution OK (${w}x${h}).` });
+    }
+  }
+
+  if (title === title.toUpperCase() && title.length > 5 && /[A-Z]/.test(title)) {
+    checks.push({ level: "warn", msg: `Title is all-caps. Most viewers and YouTube search treat all-caps as shouting.` });
+  }
+
+  const exclamCount = (title.match(/!/g) || []).length;
+  if (exclamCount > 1) {
+    checks.push({ level: "warn", msg: `Title has ${exclamCount} exclamation marks. More than one looks clickbaity.` });
+  }
+
+  checks.push({ level: "info", msg: "Preview is approximate. Actual YouTube layout updates frequently." });
+  checks.push({ level: "info", msg: "Test the thumbnail at the smallest size (notification thumb above). If you can't read the title-implied content, viewers won't either." });
+
+  const ul = $("checks");
+  ul.innerHTML = "";
+  for (const c of checks) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="check-icon ${c.level}">${c.level === "ok" ? "OK" : c.level === "warn" ? "!" : "i"}</span><span>${c.msg}</span>`;
+    ul.appendChild(li);
+  }
+}
+
+$("thumb-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    currentImageDataUrl = ev.target.result;
+    const img = new Image();
+    img.onload = () => {
+      currentImageDimensions = { w: img.naturalWidth, h: img.naturalHeight };
+      applyToAll();
+    };
+    img.src = currentImageDataUrl;
+  };
+  reader.readAsDataURL(file);
+});
+
+$("title-input").addEventListener("input", applyToAll);
+$("channel-input").addEventListener("input", applyToAll);
+$("meta-input").addEventListener("input", applyToAll);
+
+$("clear-btn").addEventListener("click", () => {
+  $("thumb-input").value = "";
+  $("title-input").value = "";
+  currentImageDataUrl = null;
+  currentImageDimensions = null;
+  $("empty").style.display = "block";
+  $("grid").style.display = "none";
+  $("checks-section").style.display = "none";
+  $("title-count").textContent = "0";
+});
+
+$("sample-btn").addEventListener("click", () => {
+  // Generate a sample 1280x720 placeholder via canvas
+  const c = document.createElement("canvas");
+  c.width = 1280; c.height = 720;
+  const ctx = c.getContext("2d");
+  // Gradient background
+  const g = ctx.createLinearGradient(0, 0, 1280, 720);
+  g.addColorStop(0, "#c0388f");
+  g.addColorStop(1, "#3d1c5e");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 1280, 720);
+  // Big text
+  ctx.fillStyle = "white";
+  ctx.font = "bold 140px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("SAMPLE", 640, 320);
+  ctx.font = "60px sans-serif";
+  ctx.fillText("1280 x 720", 640, 440);
+  currentImageDataUrl = c.toDataURL("image/png");
+  currentImageDimensions = { w: 1280, h: 720 };
+  if (!$("title-input").value) {
+    $("title-input").value = "How to test thumbnails before you publish";
+  }
+  applyToAll();
+});
+
+setTheme("light");
+</script>
+</body>
+</html>

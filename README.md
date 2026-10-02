@@ -10,7 +10,7 @@ Open [`index.html`](./index.html). Upload a thumbnail (1280x720 recommended). Ty
 
 The tool also runs a few automated checks: title length, aspect ratio, resolution, all-caps, exclamation count.
 
-## Why
+## Why this exists
 
 Thumbnails get evaluated at a dozen different sizes. A thumb that pops at 1280x720 in your editor can be unreadable at 88px in a notification, or invisible against the dark sidebar background. Most creators only test one preview, then publish and find out the hard way.
 
@@ -37,9 +37,9 @@ Each placement renders in both light and dark themes since YouTube users are spl
 
 ## Privacy
 
-The thumbnail file is read with FileReader and rendered in your browser. No upload. No network requests. Verify by opening DevTools and watching the network tab; nothing leaves the page.
+The thumbnail file is read with FileReader and rendered in your browser. No upload. No network requests. Verify by opening DevTools and watching the network tab; nothing leaves the page. The only thing saved to `localStorage` is your light or dark theme choice, under the key `theme`.
 
-## Running locally
+## Run locally
 
 ```
 git clone https://github.com/0xelitesystem/youtube-thumbnail-tester
